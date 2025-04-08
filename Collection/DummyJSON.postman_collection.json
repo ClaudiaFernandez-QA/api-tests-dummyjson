@@ -1,0 +1,421 @@
+{
+	"info": {
+		"_postman_id": "38cf875a-e037-4693-82d5-28e4fc7ca10a",
+		"name": "DummyJSON",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28264711",
+		"_collection_link": "https://trello-apitesting.postman.co/workspace/4a518145-bf8c-4a2f-8ed4-685cd3d9eec0/collection/28264711-38cf875a-e037-4693-82d5-28e4fc7ca10a?action=share&source=collection_link&creator=28264711"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resp = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Valida el status code 200 OK\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Valida el token generado\", ()=>{\r",
+									"    pm.expect(resp).to.have.property(\"accessToken\");\r",
+									"    pm.expect(resp.accessToken).to.not.be.null;\r",
+									"});\r",
+									"\r",
+									"//Se guarda el token\r",
+									"pm.environment.set(\"auth_token\", resp.accessToken);\r",
+									"\r",
+									"//Se guarda el ID del usuario\r",
+									"pm.environment.set(\"user_id\",resp.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"emmaj\",\r\n    \"password\": \"emmajpass\",\r\n    \"expiresInMins\": 60 // optional, defaults to 60\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const usersData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Valida el status 200 OK\",() => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Valida que la respuesta del servidor es menor a 1 segundo\",()=>{\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Valida que la lista de usuarios no este vacía\",()=>{\r",
+									"pm.expect(usersData.users).to.be.an(\"array\").that.is.not.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Valida las principales propiedades del usuario\", () => {\r",
+									"    usersData.users.forEach((user) => {\r",
+									"        pm.expect(user).to.have.property(\"id\").and.to.be.a(\"number\").and.to.not.be.null;\r",
+									"        pm.expect(user).to.have.property(\"username\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+									"        pm.expect(user).to.have.nested.property(\"address.country\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+									"        pm.expect(user).to.have.nested.property(\"company.title\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+									"        pm.expect(user).to.have.nested.property(\"company.address.country\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+									"        pm.expect(user).to.have.property(\"role\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "search user - invalid input",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"const inputTested = pm.collectionVariables.get(\"invalid_input\");\r",
+									"\r",
+									"if (!inputTested) {\r",
+									"    console.warn(\"⚠️ No hay input definido. Se finalizó el ciclo de pruebas.\");\r",
+									"    return;\r",
+									"}\r",
+									"\r",
+									"pm.test(`Valida Status 200 - con el input inválido \"${inputTested}\"`, () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"//Para inputs vacíos el servicio devuelve todos los usuarios\r",
+									"if (inputTested === \"     \") {\r",
+									"    pm.test(\"Este input devuelve todos los usuarios (hallazgo documentado)\", () => {\r",
+									"        pm.expect(response.users.length).to.be.greaterThan(0);\r",
+									"    });\r",
+									"} else {\r",
+									"    // Validamos que no haya resultados para el resto de los inputs\r",
+									"    pm.test(`Valida que no devulve resultados para input inválido: \"${inputTested}\"`, () => {\r",
+									"        pm.expect(response.users).to.be.an(\"array\").that.is.empty;\r",
+									"        pm.expect(response.total).to.eql(0);\r",
+									"        pm.expect(response.skip).to.eql(0);\r",
+									"        pm.expect(response.limit).to.eql(0);\r",
+									"    });\r",
+									"\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const invalidInputs = [\"123\", \"!@#$\", \"     \", \"null\", \"undefined\"];\r",
+									"let currentIndex = parseInt(pm.collectionVariables.get(\"invalidIndex\"));\r",
+									"\r",
+									"if (isNaN(currentIndex)) {\r",
+									"    currentIndex = 0;\r",
+									"}\r",
+									"\r",
+									"if (currentIndex < invalidInputs.length) {\r",
+									"    const currentInput = invalidInputs[currentIndex];\r",
+									"    pm.collectionVariables.set(\"invalid_input\", currentInput);\r",
+									"    pm.collectionVariables.set(\"invalidIndex\", currentIndex + 1);\r",
+									"} else {\r",
+									"    console.log(\"✅ Se completaron todos los casos de input inválido\");\r",
+									"    pm.collectionVariables.unset(\"invalidIndex\");\r",
+									"    pm.collectionVariables.unset(\"invalid_input\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/search?q={{invalid_input}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{invalid_input}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "search user - happy path",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"const searchName = pm.collectionVariables.get(\"searchName\");\r",
+									"\r",
+									"const expectedValidResults = [\"Michael\", \"Emily\"];\r",
+									"const expectedEmptyResults = [\"George\", \"Walter\"];\r",
+									"\r",
+									"if (!searchName) {\r",
+									"    console.warn(\"⚠️ No hay nombre definido. Se finalizó el ciclo de pruebas.\");\r",
+									"    return;\r",
+									"};\r",
+									"\r",
+									"if (expectedEmptyResults.includes(searchName)) {\r",
+									"\r",
+									"    pm.test(\"Valida cuando el usuario ingresado no tiene datos\", () => {\r",
+									"        pm.expect(response.users.length).to.eql(0);\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Valida que la estructura de respuesta no tengan datos\", () => {\r",
+									"        pm.expect(response).to.have.property(\"users\").that.is.an(\"array\").and.is.empty;\r",
+									"        pm.expect(response).to.have.property(\"total\").that.is.a(\"number\").and.is.eql(0);\r",
+									"        pm.expect(response).to.have.property(\"skip\").and.is.eql(0);\r",
+									"        pm.expect(response).to.have.property(\"limit\").and.is.eql(0);\r",
+									"\r",
+									"    });\r",
+									"\r",
+									"} else if (expectedValidResults.includes(searchName)) {\r",
+									"\r",
+									"    pm.test(`Valida que la busqueda sea segun el nombre ingresado: ${searchName}`, () => {\r",
+									"        pm.expect(response.users).to.be.an(\"array\").that.is.not.empty;\r",
+									"        response.users.forEach(user => {\r",
+									"            pm.expect(user.firstName.toLowerCase()).to.include(searchName.toLowerCase());\r",
+									"        });\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Valida que el usuario tiene sus propiedades claves\", () => {\r",
+									"        response.users.forEach(user => {\r",
+									"            pm.expect(user).to.have.property(\"id\").that.is.a(\"number\");\r",
+									"            pm.expect(user).to.have.property(\"username\").that.is.a(\"string\");\r",
+									"            pm.expect(user).to.have.property(\"email\").that.is.a(\"string\");\r",
+									"        })\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Valida la estructura de respuesta contiene las propiedades clave\", () => {\r",
+									"        pm.expect(response).to.have.property(\"users\").that.is.an(\"array\");\r",
+									"        pm.expect(response).to.have.property(\"total\").that.is.a(\"number\");\r",
+									"        pm.expect(response).to.have.property(\"skip\");\r",
+									"        pm.expect(response).to.have.property(\"limit\");\r",
+									"\r",
+									"    });\r",
+									"\r",
+									"    if (response.users.length > 1) {\r",
+									"        pm.test(\"Validar si los usuarios están ordenados por ID ascendente\", () => {\r",
+									"            const ids = response.users.map(u => u.id);\r",
+									"            const sorted = [...ids].sort((a, b) => a - b);\r",
+									"            pm.expect(ids).to.eql(sorted);\r",
+									"        });\r",
+									"    }\r",
+									"\r",
+									"} else {\r",
+									"    pm.expect.fail(`El nombre \"${searchName}\" no está definido como válido ni vacío en los tests.`);\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"//Lista de nombres para testear.\r",
+									"const searchValues = [\"Michael\", \"Emily\", \"George\", \"Walter\"];\r",
+									"// Michael| Emily --> tienen datos.\r",
+									"// George | Walter --> no tienen datos.\r",
+									"\r",
+									"// Obtenemos el índice actual. Si no está seteado va en 0.\r",
+									"let currentIndex = parseInt(pm.collectionVariables.get(\"searchIndex\"));\r",
+									"if (isNaN(currentIndex)) {\r",
+									"    currentIndex = 0;\r",
+									"}\r",
+									"\r",
+									"if(currentIndex < searchValues.length){\r",
+									"    const firstName = searchValues[currentIndex];\r",
+									"    // Se setea la variable que s usa en la URL\r",
+									"    pm.collectionVariables.set(\"searchName\", firstName);\r",
+									"    // Se actualiza el índice para el próximo test\r",
+									"    pm.collectionVariables.set(\"searchIndex\",currentIndex + 1);\r",
+									"}else {\r",
+									"    console.log(\"Ya se probaron todas las variables de busqueda\");\r",
+									"    // Se resetea el índice para permitir repetir el ciclo\r",
+									"    pm.collectionVariables.unset(\"searchIndex\");\r",
+									"    pm.collectionVariables.unset(\"searchName\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/search?q={{searchName}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{searchName}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": []
+		},
+		{
+			"name": "Carts",
+			"item": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "searchName",
+			"value": ""
+		},
+		{
+			"key": "searchIndex",
+			"value": ""
+		},
+		{
+			"key": "invalid_input",
+			"value": ""
+		},
+		{
+			"key": "invalidIndex",
+			"value": ""
+		}
+	]
+}
