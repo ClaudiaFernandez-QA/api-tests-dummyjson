@@ -87,7 +87,37 @@ Esta sección contiene pruebas de operaciones básicas sobre usuarios usando los
 - Se valida:
   - Código de estado `200 OK`
   - Que los usuarios estén ordenados por edad de forma descendente
-  - 
+
+
+### 🎯 `/users/filter` con parámetros personalizados
+
+- Endpoint probado: `/users/filter?key=address.city&value=Chicago`
+- Se valida:
+  - Código de estado `200 OK`
+  - Que todos los usuarios devueltos tengan como ciudad `"Chicago"` (`user.address.city`)
+
+
+### 📄 `/users` con paginación (`limit` y `skip`)
+
+- Endpoint probado: `/users?limit=5&skip=10`
+- Se valida:
+  - Código de estado `200 OK`
+  - Que se devuelvan exactamente la cantidad de usuarios pasados en el parametro 'limit'.
+  - Que los valores de `limit` y `skip` coincidan con los enviados
+  - Que el total de usuarios sea mayor al `skip`
+
+- 💡 Se accede dinámicamente a los valores de los query params
+  
+---
+
+### 🧩 `/users` con campos seleccionados (`select`)
+
+- Endpoint probado: `/users?select=username,email`
+- Se valida:
+  - Código de estado `200 OK`
+  - Que cada usuario devuelto contenga **solo** las propiedades `username` y `email`
+  - Que **no** se incluyan otras propiedades como `lastName`, `age`, `address`, `company`, etc.
+
 ---
 
 ⚠️ **Nota sobre persistencia de datos**
