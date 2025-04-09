@@ -48,41 +48,48 @@ Se capturan y guardan variables como el token de sesión y el ID del usuario par
 - 📊 Verifica que los usuarios estén ordenados por `id` ascendente (si hay más de uno)
 - 🧪 Casos de prueba negativos con inputs inválidos (`123`, `!@#$`, espacios, etc.)
 
-### 🔧 `/users – CRUD (Crear, Editar y Eliminar usuario)`
-Esta sección contiene pruebas de operaciones básicas sobre usuarios usando los métodos POST, PUT y DELETE.
+### 🔧 `/users` – POST / PUT / DELETE
 
-✅ POST /users/add
-Crea un nuevo usuario con nombre, email y edad
+Esta sección contiene pruebas de operaciones básicas sobre usuarios usando los métodos `POST`, `PUT` y `DELETE`.
 
-Se valida:
-Código de estado 200 OK
-Que se devuelva un objeto con las propiedades id, firstName y email
-Que los tipos de datos sean los correctos
-El ID del nuevo usuario se guarda en una variable de colección para los pasos siguientes
+#### ✅ `POST /users/add`
+- Crea un nuevo usuario con `firstName`, `lastName`, `age` y `email`
+- Se valida:
+  - Código de estado `201 Created`
+  - Que el objeto devuelto tenga las propiedades `id`, `firstName`,`lastName`, `age`, `email` con sus valores correspondientes
+- El `id` del usuario creado se guarda en una variable de colección para los pasos siguientes
 
-🔄 PUT /users/:id
-Actualiza el nombre y edad del usuario creado
+#### 🔄 `PUT /users/:id`
+- Actualiza el nombre del usuario creado
+- Se valida:
+  - Código de estado `200 OK`
+  - Que el objeto de respuesta no este vacío
+  - Que el cambio reflejados coincidan con el dato enviado (`firstName`)
+ 
+#### 🔄 `GET /users/:id`
+- Busca por id al usuario actualizado
+- Se valida:
+  - Código de estado `200 OK`
+  - Que el objeto de respuesta no este vacío
+  - Que el id de respuesta coincidan con el id enviado
 
-Se valida:
-Código de estado 200 OK
-Que se reflejen correctamente los cambios en la respuesta
-Que los campos actualizados sean correctos (firstName, age)
 
-🗑️ DELETE /users/:id
-Elimina el usuario previamente creado/modificado
+#### 🗑️ `DELETE /users/:id`
+- Elimina el usuario previamente creado
+- Se valida:
+  - Código de estado `200 OK`
+  - Que la respuesta incluya el `id` del usuario eliminado
 
-Se valida:
-Código de estado 200 OK
-Que se devuelva una respuesta confirmando el id del usuario eliminado
+---
 
-## ⚠️ Nota sobre persistencia de datos
-⚠️ DummyJSON no persiste los datos creados, modificados ni eliminados mediante POST, PUT o DELETE.
-Es decir, las operaciones CRUD se simulan, pero no afectan realmente la base de datos.
+⚠️ **Nota sobre persistencia de datos**
 
-### 🧪 En esta colección:
+DummyJSON **no guarda los cambios realizados mediante `POST`, `PUT` o `DELETE`**.  
+Las respuestas se simulan, pero **los datos no se modifican realmente en el servidor**.
 
-###Se usa un ID existente (12) para simular actualizaciones y eliminaciones
-
+🔧 Por eso, en esta colección:
+- Se usa un ID real (`12`) para simular la edición y eliminación
+- Se validan las respuestas como si fueran reales
 
 ## ⚠️ Casos especiales y hallazgos funcionales
 
