@@ -4,7 +4,7 @@
 		"name": "DummyJSON",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28264711",
-		"_collection_link": "https://trello-apitesting.postman.co/workspace/4a518145-bf8c-4a2f-8ed4-685cd3d9eec0/collection/28264711-38cf875a-e037-4693-82d5-28e4fc7ca10a?action=share&source=collection_link&creator=28264711"
+		"_collection_link": "https://trello-apitesting.postman.co/workspace/API-TESTING~4a518145-bf8c-4a2f-8ed4-685cd3d9eec0/collection/28264711-38cf875a-e037-4693-82d5-28e4fc7ca10a?action=share&source=collection_link&creator=28264711"
 	},
 	"item": [
 		{
@@ -69,6 +69,435 @@
 		{
 			"name": "Users",
 			"item": [
+				{
+					"name": "CRUD",
+					"item": [
+						{
+							"name": "users/add",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida usuario creado, status 201 Created\", () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que el usuario creado tenga ID y los datos ingresados\", () => {\r",
+											"    pm.expect(res).to.have.property(\"id\");\r",
+											"    pm.expect(res.firstName).to.eql(\"TestQA\");\r",
+											"    pm.expect(res.lastName).to.eql(\"Auto\");\r",
+											"    pm.expect(res.age).to.eql(30);\r",
+											"    pm.expect(res.email).to.eql(\"testqa.auto@example.com\");\r",
+											"});\r",
+											"\r",
+											"// Como la API no guarda el nuevo usuario, usamos un ID existente (12) para simular PUT y DELETE\r",
+											"pm.collectionVariables.set(\"new_user_id\", 12);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"firstName\": \"TestQA\",\r\n  \"lastName\": \"Auto\",\r\n  \"age\": 30,\r\n  \"email\": \"testqa.auto@example.com\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users/add",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"add"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "users/update",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida actualización ejecutada- status 200\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que el objeto usuario no este vacío\", () => {\r",
+											"    pm.expect(res).to.be.an(\"object\").that.is.not.empty;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida la actualización del usuario\", ()=> {\r",
+											"    pm.expect(res.firstName).to.eql(\"TestQA_Modificado\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"firstName\": \"TestQA_Modificado\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users/{{new_user_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"{{new_user_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read new User",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const userData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida el status 200 OK\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que el objeto usuario no este vacio\", () => {\r",
+											"    pm.expect(userData).to.be.an(\"object\").that.is.not.empty;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida las propiedades ID y firstName del usuario\", () => {\r",
+											"    pm.expect(userData).to.have.property(\"id\").and.to.be.a(\"number\").and.to.be.eql(pm.collectionVariables.get(\"new_user_id\"));\r",
+											"    pm.expect(userData).to.have.property(\"firstName\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+											"\r",
+											"});\r",
+											"\r",
+											"\r",
+											"\r",
+											"\r",
+											"\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/{{new_user_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"{{new_user_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida usuario eliminado - status 200\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida la eliminación del usuario\", () => {\r",
+											"    pm.expect(res.id).to.eql(parseInt(pm.collectionVariables.get(\"new_user_id\")));\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/{{new_user_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"{{new_user_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Query params",
+					"item": [
+						{
+							"name": "Sort by Age",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida el status 200 OK\",() => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que la lista de usuarios este ordenada por edad y de forma descendente\",()=> {\r",
+											"    const ages = res.users.map(u => u.age);\r",
+											"    const orderByAges = [...ages].sort((a,b) => b - a);\r",
+											"    pm.expect(ages).to.eql(orderByAges);\r",
+											"\r",
+											"})\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users?sortBy=age&order=desc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users"
+									],
+									"query": [
+										{
+											"key": "sortBy",
+											"value": "age"
+										},
+										{
+											"key": "order",
+											"value": "desc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Filter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida Status 200 OK\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que todos los usuarios tienen la ciudad 'Chicago'\",()=>{\r",
+											"    res.users.forEach(user => {\r",
+											"        pm.expect(user).to.have.nested.property(\"address.city\",\"Chicago\");\r",
+											"    });\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/filter?key=address.city&value=Chicago",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"filter"
+									],
+									"query": [
+										{
+											"key": "key",
+											"value": "address.city"
+										},
+										{
+											"key": "value",
+											"value": "Chicago"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Limit & Skip",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"const res = pm.response.json();\r",
+											"\r",
+											"// Se Captura los query params como objeto\r",
+											"const params = pm.request.url.query.toObject();\r",
+											"const limit = parseInt(params.limit);\r",
+											"const skip = parseInt(params.skip);\r",
+											"\r",
+											"console.log(\"Parametros\", pm.request.url.query);\r",
+											"\r",
+											"pm.test(\"Valida Status 200 OK\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(`Valida que devuelve exactamente ${limit} usuarios`, () => {\r",
+											"    pm.expect(res.users.length).to.eql(limit);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida el valor de 'limit' coincide con el query param\", () => {\r",
+											"    pm.expect(res.limit).to.eql(limit);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida el valor de 'skip' coincide con el query param\", () => {\r",
+											"    pm.expect(res.skip).to.eql(skip);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que el total debe ser mayor al skip\", () => {\r",
+											"    pm.expect(res.total).to.be.above(skip);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users?limit={{limit}}&skip={{skip}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "{{limit}}"
+										},
+										{
+											"key": "skip",
+											"value": "{{skip}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Select",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida Status 200 OK\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que cada usuario solo tenga las propiedades seleccionadas\", () => {\r",
+											"    res.users.forEach(user => {\r",
+											"        const keys = Object.keys(user);\r",
+											"        pm.expect(keys).to.include.members([\"username\", \"email\"]);\r",
+											"        pm.expect(keys).to.not.include.members([\"lastName\", \"age\", \"address\", \"phone\", \"company\"]);\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"pm.test(\"📦 La respuesta contiene el array de usuarios\", () => {\r",
+											"    pm.expect(res).to.have.property(\"users\").that.is.an(\"array\").and.is.not.empty;\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users?select=username,email",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users"
+									],
+									"query": [
+										{
+											"key": "select",
+											"value": "username,email"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
 				{
 					"name": "users",
 					"event": [
@@ -410,12 +839,18 @@
 			"value": ""
 		},
 		{
-			"key": "invalid_input",
+			"key": "new_user_id",
 			"value": ""
 		},
 		{
-			"key": "invalidIndex",
-			"value": ""
+			"key": "limit",
+			"value": "5",
+			"type": "string"
+		},
+		{
+			"key": "skip",
+			"value": "10",
+			"type": "string"
 		}
 	]
 }
