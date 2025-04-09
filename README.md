@@ -108,7 +108,6 @@ Esta sección contiene pruebas de operaciones básicas sobre usuarios usando los
 
 - 💡 Se accede dinámicamente a los valores de los query params
   
----
 
 ### 🧩 `/users` con campos seleccionados (`select`)
 
