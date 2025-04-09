@@ -28,7 +28,7 @@ Se capturan y guardan variables como el token de sesión y el ID del usuario par
 
 ## 🧪 Testeos realizados
 
-### 👤 /users
+### 👤 `/users`
 - ✅ Valida status code 200 OK
 - ⏱️ Valida que la respuesta sea menor a 1 segundo
 - 📋 Verifica que la lista de usuarios no esté vacía
@@ -39,3 +39,22 @@ Se capturan y guardan variables como el token de sesión y el ID del usuario par
   - company.title (string)
   - company.address.country (string)
   - role (string)
+
+### 🔍 `/users/search`
+- 🧠 Tests dinámicos por nombre usando variables de colección
+- ✅ Valida coincidencia exacta con `firstName`
+- 🧩 Valida estructura completa del response
+- 🔐 Valida comportamiento cuando no hay resultados esperados
+- 📊 Verifica que los usuarios estén ordenados por `id` ascendente (si hay más de uno)
+- 🧪 Casos de prueba negativos con inputs inválidos (`123`, `!@#$`, espacios, etc.)
+
+## ⚠️ Casos especiales y hallazgos funcionales
+
+### Búsqueda vacía devuelve todos los usuarios
+
+- **Endpoint probado:** `GET /users/search?q=`
+- **Caso:** valor `"   "` (espacios en blanco)
+- **Resultado:** status `200 OK` y devuelve la lista completa de usuarios
+- **Comportamiento esperado:** array vacío.
+- **Impacto:** lógica ambigua en frontend.
+- ✅ Test automatizado incluido que detecta este comportamiento
