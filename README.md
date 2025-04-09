@@ -80,6 +80,14 @@ Esta sección contiene pruebas de operaciones básicas sobre usuarios usando los
   - Código de estado `200 OK`
   - Que la respuesta incluya el `id` del usuario eliminado
 
+
+### 🔽 `/users` con ordenamiento
+
+- Endpoint probado: `/users?sortBy=age&order=desc`
+- Se valida:
+  - Código de estado `200 OK`
+  - Que los usuarios estén ordenados por edad de forma descendente
+  - 
 ---
 
 ⚠️ **Nota sobre persistencia de datos**
