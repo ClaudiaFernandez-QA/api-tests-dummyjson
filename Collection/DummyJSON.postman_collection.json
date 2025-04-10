@@ -67,7 +67,7 @@
 					"response": []
 				}
 			],
-			"description": "## 🔐 Autenticación\n\nEsta carpeta contiene el request de login necesario para obtener el token de autenticación.  \nEs el primer paso obligatorio antes de ejecutar cualquier otro endpoint de la colección.\n\n- El token obtenido se guarda en una variable de entorno (`auth_token`)\n    \n- El ID del usuario logueado también se guarda como `user_id`\n    \n- Ambos valores se reutilizan en requests posteriores"
+			"description": "## 🔐 Autenticación\n\nEsta carpeta contiene el request de login necesario para obtener el token de autenticación.  \nEs el primer paso obligatorio antes de ejecutar cualquier otro endpoint de la colección.\n\n- El token obtenido se guarda en una variable de entorno (`auth_token`)\n    \n- El ID del usuario logueado también se guarda como `user_id`\n   "
 		},
 		{
 			"name": "Users",
