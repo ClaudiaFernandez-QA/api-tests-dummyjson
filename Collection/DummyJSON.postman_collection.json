@@ -2,13 +2,14 @@
 	"info": {
 		"_postman_id": "38cf875a-e037-4693-82d5-28e4fc7ca10a",
 		"name": "DummyJSON",
+		"description": "### 📋 Documentación técnica\n\n#### 🔹 Propósito\n\nEsta colección contiene pruebas automatizadas sobre la API pública DummyJSON, aplicando buenas prácticas de testing, scripting en Postman y una simple automatización con Collection Runner.\n\n#### 🔹 Endpoints cubiertos\n\n- `POST /auth/login` → Autenticación\n    \n- `GET /users` → Validaciones básicas, estructura y tiempos\n    \n- `GET /users/search?q=` → Búsquedas dinámicas y validaciones condicionales\n    \n- `POST /users/add` → Creación de usuarios simulada\n    \n- `PUT /users/:id` → Actualización simulada\n    \n- `DELETE /users/:id` → Eliminación simulada\n    \n- `GET /users?sortBy=&order=` → Ordenamiento\n    \n- `GET /users/filter?key=&value=` → Filtros anidados\n    \n- `GET /users?limit=&skip=` → Paginación dinámica\n    \n- `GET /users?select=` → Selección de campos\n    \n- `POST /users/add` (Runner) → Pruebas con archivo CSV\n    \n\n#### 🔹 Técnicas aplicadas\n\n- Validaciones con Chai.js (`expect`)\n    \n- Reutilización de variables (`collection`, `env`, `URL params`)\n    \n- Pre-request scripts para ejecutar flujos con múltiples valores\n    \n- Automatización por datos (Data Driven con CSV)\n    \n- Acceso dinámico a `pm.iterationData`\n    \n\n#### ⚠️ Nota funcional importante\n\nDummyJSON no guarda los datos creados ni modificados.\n\nLas operaciones CRUD son **simuladas**, por lo que las pruebas validan la respuesta, **no el efecto en el servidor**.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28264711",
 		"_collection_link": "https://trello-apitesting.postman.co/workspace/API-TESTING~4a518145-bf8c-4a2f-8ed4-685cd3d9eec0/collection/28264711-38cf875a-e037-4693-82d5-28e4fc7ca10a?action=share&source=collection_link&creator=28264711"
 	},
 	"item": [
 		{
-			"name": "Auth",
+			"name": "Authentication",
 			"item": [
 				{
 					"name": "login",
@@ -60,17 +61,316 @@
 								"auth",
 								"login"
 							]
-						}
+						},
+						"description": "### 🔐 POST /auth/login\n\nAutentica un usuario con credenciales válidas.\n\n- Usuario: `emmaj`\n    \n- Contraseña: `emmajpass`\n    \n\n#### 🔐 ¿Qué hace este request?\n\n- Envía nombre de usuario y contraseña.\n    \n- Recibe un token y los datos del usuario autenticado.\n    \n\n#### ✅ Validaciones realizadas:\n\n- Código de estado `200 OK`\n    \n- Que se reciba un `accessToken`\n    \n\n#### 📥 Valores guardados:\n\n- `auth_token` → se guarda como variable de entorno.\n    \n- `user_id` → se guarda como variable de entorno.\n    \n\n#### ℹ️ Notas:\n\n- Este login debe ejecutarse antes que cualquier request protegido.\n    \n- El token se usa luego como `Bearer {{token}}` en el header."
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "## 🔐 Autenticación\n\nEsta carpeta contiene el request de login necesario para obtener el token de autenticación.  \nEs el primer paso obligatorio antes de ejecutar cualquier otro endpoint de la colección.\n\n- El token obtenido se guarda en una variable de entorno (`auth_token`)\n    \n- El ID del usuario logueado también se guarda como `user_id`\n    \n- Ambos valores se reutilizan en requests posteriores"
 		},
 		{
 			"name": "Users",
 			"item": [
 				{
-					"name": "CRUD",
+					"name": "Basic GET requests",
+					"item": [
+						{
+							"name": "get all users",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const usersData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida el status 200 OK\",() => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que la respuesta del servidor es menor a 5 segundo\",()=>{\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida que la lista de usuarios no este vacía\",()=>{\r",
+											"pm.expect(usersData.users).to.be.an(\"array\").that.is.not.empty;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida las principales propiedades del usuario\", () => {\r",
+											"    usersData.users.forEach((user) => {\r",
+											"        pm.expect(user).to.have.property(\"id\").and.to.be.a(\"number\").and.to.not.be.null;\r",
+											"        pm.expect(user).to.have.property(\"username\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+											"        pm.expect(user).to.have.nested.property(\"address.country\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+											"        pm.expect(user).to.have.nested.property(\"company.title\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+											"        pm.expect(user).to.have.nested.property(\"company.address.country\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+											"        pm.expect(user).to.have.property(\"role\").and.to.be.a(\"string\").and.to.not.be.null;\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"\r",
+											"\r",
+											"\r",
+											"\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users"
+									]
+								},
+								"description": "### 📄 GET /users\n\nEste endpoint devuelve una lista de todos los usuarios disponibles en la base de datos.\n\n#### ✅ ¿Qué se valida en esta prueba?\n\n- Código de estado `200 OK`\n    \n- Tiempo de respuesta menor a 5 segundo\n    \n- Que la respuesta contenga una lista (`array`) de usuarios\n    \n- Que cada usuario tenga las siguientes propiedades clave:\n    \n    - `id` (number)\n        \n    - `username` (string)\n        \n    - `address.country` (string)\n        \n    - `company.title` (string)\n        \n    - `company.address.country` (string)\n        \n    - `role` (string)\n        \n\n🧪 Se utiliza `forEach` para validar todos los elementos del array  \n  \n📦 También se controla que la lista no sea `null` ni vacía"
+							},
+							"response": []
+						},
+						{
+							"name": "get users by search - valid inputs",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const response = pm.response.json();\r",
+											"const searchName = pm.collectionVariables.get(\"searchName\");\r",
+											"\r",
+											"const expectedValidResults = [\"Michael\", \"Emily\"];\r",
+											"const expectedEmptyResults = [\"George\", \"Walter\"];\r",
+											"\r",
+											"if (!searchName) {\r",
+											"    console.warn(\"⚠️ No hay nombre definido. Se finalizó el ciclo de pruebas.\");\r",
+											"    return;\r",
+											"};\r",
+											"\r",
+											"if (expectedEmptyResults.includes(searchName)) {\r",
+											"\r",
+											"    pm.test(\"Valida cuando el usuario ingresado no tiene datos\", () => {\r",
+											"        pm.expect(response.users.length).to.eql(0);\r",
+											"    });\r",
+											"\r",
+											"    pm.test(\"Valida que la estructura de respuesta no tengan datos\", () => {\r",
+											"        pm.expect(response).to.have.property(\"users\").that.is.an(\"array\").and.is.empty;\r",
+											"        pm.expect(response).to.have.property(\"total\").that.is.a(\"number\").and.is.eql(0);\r",
+											"        pm.expect(response).to.have.property(\"skip\").and.is.eql(0);\r",
+											"        pm.expect(response).to.have.property(\"limit\").and.is.eql(0);\r",
+											"\r",
+											"    });\r",
+											"\r",
+											"} else if (expectedValidResults.includes(searchName)) {\r",
+											"\r",
+											"    pm.test(`Valida que la busqueda sea segun el nombre ingresado: ${searchName}`, () => {\r",
+											"        pm.expect(response.users).to.be.an(\"array\").that.is.not.empty;\r",
+											"        response.users.forEach(user => {\r",
+											"            pm.expect(user.firstName.toLowerCase()).to.include(searchName.toLowerCase());\r",
+											"        });\r",
+											"    });\r",
+											"\r",
+											"    pm.test(\"Valida que el usuario tiene sus propiedades claves\", () => {\r",
+											"        response.users.forEach(user => {\r",
+											"            pm.expect(user).to.have.property(\"id\").that.is.a(\"number\");\r",
+											"            pm.expect(user).to.have.property(\"username\").that.is.a(\"string\");\r",
+											"            pm.expect(user).to.have.property(\"email\").that.is.a(\"string\");\r",
+											"        })\r",
+											"    });\r",
+											"\r",
+											"    pm.test(\"Valida la estructura de respuesta contiene las propiedades clave\", () => {\r",
+											"        pm.expect(response).to.have.property(\"users\").that.is.an(\"array\");\r",
+											"        pm.expect(response).to.have.property(\"total\").that.is.a(\"number\");\r",
+											"        pm.expect(response).to.have.property(\"skip\");\r",
+											"        pm.expect(response).to.have.property(\"limit\");\r",
+											"\r",
+											"    });\r",
+											"\r",
+											"    if (response.users.length > 1) {\r",
+											"        pm.test(\"Validar si los usuarios están ordenados por ID ascendente\", () => {\r",
+											"            const ids = response.users.map(u => u.id);\r",
+											"            const sorted = [...ids].sort((a, b) => a - b);\r",
+											"            pm.expect(ids).to.eql(sorted);\r",
+											"        });\r",
+											"    }\r",
+											"\r",
+											"} else {\r",
+											"    pm.expect.fail(`El nombre \"${searchName}\" no está definido como válido ni vacío en los tests.`);\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"//Lista de nombres para testear.\r",
+											"const searchValues = [\"Michael\", \"Emily\", \"George\", \"Walter\"];\r",
+											"// Michael| Emily --> tienen datos.\r",
+											"// George | Walter --> no tienen datos.\r",
+											"\r",
+											"// Obtenemos el índice actual. Si no está seteado va en 0.\r",
+											"let currentIndex = parseInt(pm.collectionVariables.get(\"searchIndex\"));\r",
+											"if (isNaN(currentIndex)) {\r",
+											"    currentIndex = 0;\r",
+											"}\r",
+											"\r",
+											"if(currentIndex < searchValues.length){\r",
+											"    const firstName = searchValues[currentIndex];\r",
+											"    // Se setea la variable que s usa en la URL\r",
+											"    pm.collectionVariables.set(\"searchName\", firstName);\r",
+											"    // Se actualiza el índice para el próximo test\r",
+											"    pm.collectionVariables.set(\"searchIndex\",currentIndex + 1);\r",
+											"}else {\r",
+											"    console.log(\"Ya se probaron todas las variables de busqueda\");\r",
+											"    // Se resetea el índice para permitir repetir el ciclo\r",
+											"    pm.collectionVariables.unset(\"searchIndex\");\r",
+											"    pm.collectionVariables.unset(\"searchName\");\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users/search?q={{searchName}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"search"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": "{{searchName}}"
+										}
+									]
+								},
+								"description": "Este endpoint permite buscar usuarios por nombre, usando el parámetro `q`.\n\nEn esta prueba se utilizan entradas válidas como `\"Michael\"` y `\"Walter\"`, usando una variable de colección (`searchName`) que se actualiza dinámicamente en el script de `Pre-request`.\n\n#### 🧠 Lógica implementada\n\n- Se define un array de nombres, de los cuales dos contienen datos `\"Michael\"` y `\"Emily\" y los otros dos no \"George\"` y `\"Walter\".`\n    \n- El script recorre los nombres en cada iteración usando `searchIndex`\n    \n- Cada nombre se setea como `searchName` para enviar al endpoint\n    \n- Se valida la respuesta de forma distinta según si se espera o no encontrar resultados\n    \n\n#### ✅ Validaciones cuando el usuario existe\n\n- Código de estado `200 OK`\n    \n- Que se devuelvan resultados\n    \n- Que cada usuario en la respuesta tenga el `firstName` esperado\n    \n- Que cada usuario en la respuesta tenga sus propiedades claves (`id, username, email)`\n    \n- Que la respuesta tenga estructura válida (`users`, `total`, `skip`, `limit`)\n    \n- Que los usuarios estén ordenados por `id` de forma ascendente\n    \n\n### ❌ Validaciones cuando el nombre **no existe**:\n\n- Código de estado `200 OK` (DummyJSON siempre devuelve 200)\n    \n- Que el array `users` esté vacío\n    \n- Que el valor de `total` sea `0`\n    \n- Que `skip` y `limit` sean `0`\n    \n\n📌 Además, se guarda un log para saber cuándo finaliza el ciclo completo."
+							},
+							"response": []
+						},
+						{
+							"name": "get users by search - invalid inputs",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const response = pm.response.json();\r",
+											"const inputTested = pm.collectionVariables.get(\"invalid_input\");\r",
+											"\r",
+											"if (!inputTested) {\r",
+											"    console.warn(\"⚠️ No hay input definido. Se finalizó el ciclo de pruebas.\");\r",
+											"    return;\r",
+											"}\r",
+											"\r",
+											"pm.test(`Valida Status 200 - con el input inválido \"${inputTested}\"`, () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"//Para inputs vacíos el servicio devuelve todos los usuarios\r",
+											"if (inputTested === \"     \") {\r",
+											"    pm.test(\"Este input devuelve todos los usuarios (hallazgo documentado)\", () => {\r",
+											"        pm.expect(response.users.length).to.be.greaterThan(0);\r",
+											"    });\r",
+											"} else {\r",
+											"    // Validamos que no haya resultados para el resto de los inputs\r",
+											"    pm.test(`Valida que no devulve resultados para input inválido: \"${inputTested}\"`, () => {\r",
+											"        pm.expect(response.users).to.be.an(\"array\").that.is.empty;\r",
+											"        pm.expect(response.total).to.eql(0);\r",
+											"        pm.expect(response.skip).to.eql(0);\r",
+											"        pm.expect(response.limit).to.eql(0);\r",
+											"    });\r",
+											"\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const invalidInputs = [\"123\", \"!@#$\", \"     \", \"null\", \"undefined\"];\r",
+											"let currentIndex = parseInt(pm.collectionVariables.get(\"invalidIndex\"));\r",
+											"\r",
+											"if (isNaN(currentIndex)) {\r",
+											"    currentIndex = 0;\r",
+											"}\r",
+											"\r",
+											"if (currentIndex < invalidInputs.length) {\r",
+											"    const currentInput = invalidInputs[currentIndex];\r",
+											"    pm.collectionVariables.set(\"invalid_input\", currentInput);\r",
+											"    pm.collectionVariables.set(\"invalidIndex\", currentIndex + 1);\r",
+											"} else {\r",
+											"    console.log(\"✅ Se completaron todos los casos de input inválido\");\r",
+											"    pm.collectionVariables.unset(\"invalidIndex\");\r",
+											"    pm.collectionVariables.unset(\"invalid_input\");\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/search?q={{invalid_input}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"search"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": "{{invalid_input}}"
+										}
+									]
+								},
+								"description": "Este request evalúa cómo responde la API cuando se envían entradas incorrectas en el parámetro `q`.\n\n#### 🧠 Lógica implementada\n\nSe define un array con valores considerados inválidos :\n\n`const invalidInputs = [\"123\", \"!@#$\", \" \", \"null\", \"undefined\"];`\n\n- Cada valor se evalúa de forma iterativa usando una variable de colección (`invalidIndex`)\n    \n- El valor actual se guarda como `{{invalid_input}}` y se envía en el query param\n    \n- Según el valor, se ejecutan distintas validaciones\n    \n\n#### ✅ Validaciones generales:\n\n- Código de estado `200 OK` (DummyJSON responde 200 incluso para entradas erróneas)\n    \n- Que el array `users` esté vacío y que `total`, `skip` y `limit` tengal valor`0`\n    \n\n#### ⚠️ Hallazgo funcional:\n\nSi se envía una cadena con espacios (`q=`), la API **devuelve la lista completa de usuarios.**\n\nEsto podría causar:\n\n- 🔄 Comportamientos inesperados en el frontend\n    \n\n---\n\n📌 Este request demuestra manejo de pruebas negativas, scripting dinámico con `collectionVariables`, control de flujo y análisis de respuestas inesperadas."
+							},
+							"response": []
+						}
+					],
+					"description": "## 📄 Pruebas básicas de lectura – `GET /users`\n\nEsta carpeta contiene pruebas fundamentales de lectura usando el endpoint `/users`.\n\nSe validan aspectos esenciales como:\n\n- Estado de respuesta (`200 OK`)\n    \n- Tiempo de respuesta aceptable (menor a 5 segundo)\n    \n- Que la lista de usuarios no esté vacía\n    \n- Que cada usuario tenga las propiedades esperadas\n    \n\nAdemás, se incluyen pruebas con búsqueda (`search`) y distintos tipos de entradas:\n\n- ✅ Entradas válidas (`q=Michael`, etc.)\n    \n- ❌ Entradas inválidas (`q=123`, espacios, símbolos)\n    \n- ⚠️ Detección de comportamiento inesperado cuando se envía un input vacío\n    \n\n🧪 Se usan scripts dinámicos y validaciones condicionales para cubrir múltiples casos."
+				},
+				{
+					"name": "CRUD operations",
 					"item": [
 						{
 							"name": "users/add",
@@ -268,10 +568,11 @@
 							},
 							"response": []
 						}
-					]
+					],
+					"description": "## 🔧 CRUD Operations – `/users`\n\nEsta carpeta contiene pruebas simuladas de operaciones básicas de tipo CRUD (Create, Read, Update, Delete) sobre usuarios.\n\n> ⚠️ Importante: DummyJSON **no persiste** los cambios realizados.  \nLas respuestas a `POST`, `PUT` y `DELETE` son simuladas, pero **no afectan realmente los datos del servidor**. \n  \n\n#### 📌 Requests incluidos:\n\n- `POST /users/add` → Crear nuevo usuario\n    \n- `PUT /users/:id` → Actualizar un usuario existente\n    \n- `GET /users/:id` → Obtener un usuario por su ID\n    \n- `DELETE /users/:id` → Eliminar un usuario\n    \n\n---\n\n### 🧪 Validaciones realizadas\n\n#### ✅ POST /users/add\n\n- Código de estado `201 Created`\n    \n- Que se retornen las propiedades `id`, `firstName`, `lastName`, `email`, `age`\n    \n- Que los valores de los datos sean correctos\n    \n- ⚠️ Como la API **no guarda** el nuevo usuario, se setea manualmente una variable de colección (`new_user_id = 12`) para simular las pruebas siguientes\n    \n\n#### 🔄 PUT /users/:id\n\n- Código de estado `200 OK`\n    \n- Que el objeto usuario no este vacío\n    \n- Que el valor enviado (`firstName`) coincida con el valor devuelto\n    \n\n#### 🔍 GET /users/:id\n\n- Código de estado `200 OK`\n    \n- Que el `id` de la respuesta coincida con el `id`que se buscó\n    \n- Que se devuelvan las propiedades esperadas (`id`, `firstName`)\n    \n\n#### 🗑️ DELETE /users/:id\n\n- Código de estado `200 OK`\n    \n- Que se retorne el `id` del usuario eliminado\n    \n\n---\n\n🔧 Como la API no guarda los cambios, se utiliza un `id` de un usuario preexistente (`12`) para simular las pruebas de actualización, búsqueda y eliminación.  \nEstas pruebas están enfocadas en validar la lógica de la respuesta y la correcta integración de los requests."
 				},
 				{
-					"name": "Query params",
+					"name": "Query parameters",
 					"item": [
 						{
 							"name": "Sort by Age",
@@ -386,12 +687,13 @@
 											"\r",
 											"const res = pm.response.json();\r",
 											"\r",
+											"\r",
 											"// Se Captura los query params como objeto\r",
 											"const params = pm.request.url.query.toObject();\r",
+											"\r",
 											"const limit = parseInt(params.limit);\r",
 											"const skip = parseInt(params.skip);\r",
 											"\r",
-											"console.log(\"Parametros\", pm.request.url.query);\r",
 											"\r",
 											"pm.test(\"Valida Status 200 OK\", () => {\r",
 											"    pm.response.to.have.status(200);\r",
@@ -496,305 +798,76 @@
 							},
 							"response": []
 						}
-					]
+					],
+					"description": "## 📊 Query Parameters – `/users`\n\nEsta carpeta contiene pruebas automatizadas que validan distintos parámetros de consulta (`query params`) aplicables al endpoint `/users`.\n\n> Se prueban comportamientos relacionados con ordenamiento, filtros, paginación y selección de campos. \n  \n\n---\n\n### 📌 Requests incluidos\n\n- `GET /users?sortBy=age&order=desc`\n    \n- `GET /users/filter?key=address.city&value=Chicago`\n    \n- `GET /users?limit=5&skip=10`\n    \n- `GET /users?select=firstName,email`\n    \n\n---\n\n### 🧪 Validaciones realizadas\n\n#### 🔽 Ordenamiento (`sortBy` y `order`)\n\n- Que los usuarios estén ordenados por la propiedad indicada (ej: `age`)\n    \n- En el orden correcto (`desc`)\n    \n\n#### 🔍 Filtro (`filter`)\n\n- Que todos los usuarios devueltos cumplan con el valor filtrado\n    \n- Se utiliza `nested.property` para validar claves anidadas como `address.city`\n    \n\n#### 🔁 Paginación (`limit` y `skip`)\n\n- Que la cantidad de usuarios sea igual al `limit`\n    \n- Que el `skip` recibido coincida con el enviado\n    \n- Que los parámetros del request se recuperen dinámicamente con:  \n    `const params = pm.request.url.query.toObject();`\n    \n\n#### 📋 Selección de campos (`select`)\n\n- Que cada usuario solo contenga las propiedades solicitadas\n    \n- Que no existan campos no requeridos (ej: `lastName`, `address`, etc.)\n    \n- Se validan las claves con: `Object.keys(user)`\n    \n\n---\n\n📌 Estas pruebas cubren la capacidad del endpoint para recibir y procesar distintos parámetros, asegurando flexibilidad, consistencia y exactitud en las respuestas."
 				},
 				{
-					"name": "users",
-					"event": [
+					"name": "Data Driven Testing",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const usersData = pm.response.json();\r",
-									"\r",
-									"pm.test(\"Valida el status 200 OK\",() => {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Valida que la respuesta del servidor es menor a 1 segundo\",()=>{\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Valida que la lista de usuarios no este vacía\",()=>{\r",
-									"pm.expect(usersData.users).to.be.an(\"array\").that.is.not.empty;\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Valida las principales propiedades del usuario\", () => {\r",
-									"    usersData.users.forEach((user) => {\r",
-									"        pm.expect(user).to.have.property(\"id\").and.to.be.a(\"number\").and.to.not.be.null;\r",
-									"        pm.expect(user).to.have.property(\"username\").and.to.be.a(\"string\").and.to.not.be.null;\r",
-									"        pm.expect(user).to.have.nested.property(\"address.country\").and.to.be.a(\"string\").and.to.not.be.null;\r",
-									"        pm.expect(user).to.have.nested.property(\"company.title\").and.to.be.a(\"string\").and.to.not.be.null;\r",
-									"        pm.expect(user).to.have.nested.property(\"company.address.country\").and.to.be.a(\"string\").and.to.not.be.null;\r",
-									"        pm.expect(user).to.have.property(\"role\").and.to.be.a(\"string\").and.to.not.be.null;\r",
-									"    });\r",
-									"});\r",
-									"\r",
-									"\r",
-									"\r",
-									"\r",
-									"\r",
-									"\r",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "search user - invalid input",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const response = pm.response.json();\r",
-									"const inputTested = pm.collectionVariables.get(\"invalid_input\");\r",
-									"\r",
-									"if (!inputTested) {\r",
-									"    console.warn(\"⚠️ No hay input definido. Se finalizó el ciclo de pruebas.\");\r",
-									"    return;\r",
-									"}\r",
-									"\r",
-									"pm.test(`Valida Status 200 - con el input inválido \"${inputTested}\"`, () => {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"//Para inputs vacíos el servicio devuelve todos los usuarios\r",
-									"if (inputTested === \"     \") {\r",
-									"    pm.test(\"Este input devuelve todos los usuarios (hallazgo documentado)\", () => {\r",
-									"        pm.expect(response.users.length).to.be.greaterThan(0);\r",
-									"    });\r",
-									"} else {\r",
-									"    // Validamos que no haya resultados para el resto de los inputs\r",
-									"    pm.test(`Valida que no devulve resultados para input inválido: \"${inputTested}\"`, () => {\r",
-									"        pm.expect(response.users).to.be.an(\"array\").that.is.empty;\r",
-									"        pm.expect(response.total).to.eql(0);\r",
-									"        pm.expect(response.skip).to.eql(0);\r",
-									"        pm.expect(response.limit).to.eql(0);\r",
-									"    });\r",
-									"\r",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const invalidInputs = [\"123\", \"!@#$\", \"     \", \"null\", \"undefined\"];\r",
-									"let currentIndex = parseInt(pm.collectionVariables.get(\"invalidIndex\"));\r",
-									"\r",
-									"if (isNaN(currentIndex)) {\r",
-									"    currentIndex = 0;\r",
-									"}\r",
-									"\r",
-									"if (currentIndex < invalidInputs.length) {\r",
-									"    const currentInput = invalidInputs[currentIndex];\r",
-									"    pm.collectionVariables.set(\"invalid_input\", currentInput);\r",
-									"    pm.collectionVariables.set(\"invalidIndex\", currentIndex + 1);\r",
-									"} else {\r",
-									"    console.log(\"✅ Se completaron todos los casos de input inválido\");\r",
-									"    pm.collectionVariables.unset(\"invalidIndex\");\r",
-									"    pm.collectionVariables.unset(\"invalid_input\");\r",
-									"}\r",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users/search?q={{invalid_input}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"search"
-							],
-							"query": [
+							"name": "Add users using CSV",
+							"event": [
 								{
-									"key": "q",
-									"value": "{{invalid_input}}"
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Valida usuario creado correctamente\", () => {\r",
+											"    pm.expect(pm.response.code).to.eql(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida los tipos de datos del usuario creado\", () => {\r",
+											"    pm.expect(res.id).to.be.a(\"number\");\r",
+											"    pm.expect(res.firstName).to.be.a(\"string\");\r",
+											"    pm.expect(res.lastName).to.be.a(\"string\");\r",
+											"    pm.expect(res.email).to.be.a(\"string\");\r",
+											"    pm.expect(res.age).to.be.a(\"number\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Valida los datos del usuario creado\", () => {\r",
+											"    pm.expect(res.firstName).to.eql(pm.iterationData.get(\"firstName\"));\r",
+											"    pm.expect(res.lastName).to.eql(pm.iterationData.get(\"lastName\"));\r",
+											"    pm.expect(res.age).to.eql(parseInt(pm.iterationData.get(\"age\")));\r",
+											"    pm.expect(res.email).to.eql(pm.iterationData.get(\"email\"));\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "search user - happy path",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const response = pm.response.json();\r",
-									"const searchName = pm.collectionVariables.get(\"searchName\");\r",
-									"\r",
-									"const expectedValidResults = [\"Michael\", \"Emily\"];\r",
-									"const expectedEmptyResults = [\"George\", \"Walter\"];\r",
-									"\r",
-									"if (!searchName) {\r",
-									"    console.warn(\"⚠️ No hay nombre definido. Se finalizó el ciclo de pruebas.\");\r",
-									"    return;\r",
-									"};\r",
-									"\r",
-									"if (expectedEmptyResults.includes(searchName)) {\r",
-									"\r",
-									"    pm.test(\"Valida cuando el usuario ingresado no tiene datos\", () => {\r",
-									"        pm.expect(response.users.length).to.eql(0);\r",
-									"    });\r",
-									"\r",
-									"    pm.test(\"Valida que la estructura de respuesta no tengan datos\", () => {\r",
-									"        pm.expect(response).to.have.property(\"users\").that.is.an(\"array\").and.is.empty;\r",
-									"        pm.expect(response).to.have.property(\"total\").that.is.a(\"number\").and.is.eql(0);\r",
-									"        pm.expect(response).to.have.property(\"skip\").and.is.eql(0);\r",
-									"        pm.expect(response).to.have.property(\"limit\").and.is.eql(0);\r",
-									"\r",
-									"    });\r",
-									"\r",
-									"} else if (expectedValidResults.includes(searchName)) {\r",
-									"\r",
-									"    pm.test(`Valida que la busqueda sea segun el nombre ingresado: ${searchName}`, () => {\r",
-									"        pm.expect(response.users).to.be.an(\"array\").that.is.not.empty;\r",
-									"        response.users.forEach(user => {\r",
-									"            pm.expect(user.firstName.toLowerCase()).to.include(searchName.toLowerCase());\r",
-									"        });\r",
-									"    });\r",
-									"\r",
-									"    pm.test(\"Valida que el usuario tiene sus propiedades claves\", () => {\r",
-									"        response.users.forEach(user => {\r",
-									"            pm.expect(user).to.have.property(\"id\").that.is.a(\"number\");\r",
-									"            pm.expect(user).to.have.property(\"username\").that.is.a(\"string\");\r",
-									"            pm.expect(user).to.have.property(\"email\").that.is.a(\"string\");\r",
-									"        })\r",
-									"    });\r",
-									"\r",
-									"    pm.test(\"Valida la estructura de respuesta contiene las propiedades clave\", () => {\r",
-									"        pm.expect(response).to.have.property(\"users\").that.is.an(\"array\");\r",
-									"        pm.expect(response).to.have.property(\"total\").that.is.a(\"number\");\r",
-									"        pm.expect(response).to.have.property(\"skip\");\r",
-									"        pm.expect(response).to.have.property(\"limit\");\r",
-									"\r",
-									"    });\r",
-									"\r",
-									"    if (response.users.length > 1) {\r",
-									"        pm.test(\"Validar si los usuarios están ordenados por ID ascendente\", () => {\r",
-									"            const ids = response.users.map(u => u.id);\r",
-									"            const sorted = [...ids].sort((a, b) => a - b);\r",
-									"            pm.expect(ids).to.eql(sorted);\r",
-									"        });\r",
-									"    }\r",
-									"\r",
-									"} else {\r",
-									"    pm.expect.fail(`El nombre \"${searchName}\" no está definido como válido ni vacío en los tests.`);\r",
-									"}\r",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"//Lista de nombres para testear.\r",
-									"const searchValues = [\"Michael\", \"Emily\", \"George\", \"Walter\"];\r",
-									"// Michael| Emily --> tienen datos.\r",
-									"// George | Walter --> no tienen datos.\r",
-									"\r",
-									"// Obtenemos el índice actual. Si no está seteado va en 0.\r",
-									"let currentIndex = parseInt(pm.collectionVariables.get(\"searchIndex\"));\r",
-									"if (isNaN(currentIndex)) {\r",
-									"    currentIndex = 0;\r",
-									"}\r",
-									"\r",
-									"if(currentIndex < searchValues.length){\r",
-									"    const firstName = searchValues[currentIndex];\r",
-									"    // Se setea la variable que s usa en la URL\r",
-									"    pm.collectionVariables.set(\"searchName\", firstName);\r",
-									"    // Se actualiza el índice para el próximo test\r",
-									"    pm.collectionVariables.set(\"searchIndex\",currentIndex + 1);\r",
-									"}else {\r",
-									"    console.log(\"Ya se probaron todas las variables de busqueda\");\r",
-									"    // Se resetea el índice para permitir repetir el ciclo\r",
-									"    pm.collectionVariables.unset(\"searchIndex\");\r",
-									"    pm.collectionVariables.unset(\"searchName\");\r",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"firstName\": \"{{firstName}}\",\r\n  \"lastName\": \"{{lastName}}\",\r\n  \"age\": {{age}},\r\n  \"email\": \"{{email}}\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users/add",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"add"
+									]
+								}
+							},
+							"response": []
 						}
 					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/users/search?q={{searchName}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"search"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "{{searchName}}"
-								}
-							]
-						}
-					},
-					"response": []
+					"description": "## 🧪 Data Driven Testing – Crear usuarios con archivo CSV\n\nEsta carpeta contiene una prueba automatizada para crear múltiples usuarios utilizando un archivo `.csv` como fuente de datos.\n\nSe utiliza el `Collection Runner` de Postman para iterar por cada fila del archivo.\n\n---\n\n### 📂 Archivo de entrada\n\nSe debe importar el archivo:  \n`/Data/users.csv`\n\nEste archivo contiene los datos de prueba con los siguientes campos:\n\n- `firstName`\n    \n- `lastName`\n    \n- `email`\n    \n- `age`\n    \n\n---\n\n### ✅ ¿Qué se valida en cada iteración?\n\n- Código de estado `201 Created`\n    \n- Que los valores devueltos coincidan con los del archivo CSV\n    \n- Que el usuario devuelto contenga las siguientes propiedades:\n    \n    - `id` (number)\n        \n    - `firstName` (string)\n        \n    - `lastName` (string)\n        \n    - `email` (string)\n        \n    - `age` (number)\n        \n\n---\n\n### ▶️ ¿Cómo ejecutar la prueba?\n\n1. Abrí `Collection Runner` en Postman\n    \n2. Seleccioná esta colección y el entorno correspondiente\n    \n3. Elegí el archivo `users.csv` como Data File\n    \n4. Ejecutá las iteraciones\n    \n\n---\n\n📌 Esta prueba demuestra cómo usar `data-driven testing` en Postman para automatizar múltiples escenarios con facilidad y consistencia."
 				}
-			]
-		},
-		{
-			"name": "Products",
-			"item": []
-		},
-		{
-			"name": "Carts",
-			"item": []
+			],
+			"description": "Esta carpeta contiene todas las pruebas automatizadas relacionadas con los endpoints del módulo `users` de la API DummyJSON.\n\nIncluye:\n\n- ✅ Pruebas básicas de lectura (`GET`)\n    \n- 🔍 Pruebas de búsqueda (`search`)\n    \n- 🔄 Operaciones simuladas de creación, modificación y eliminación (CRUD)\n    \n- 🔧 Validaciones con parámetros de consulta (`query params`)\n    \n- 🧪 Pruebas automatizadas usando archivo CSV (Data Driven Testing)\n    \n\n🧠 Se aplican validaciones sobre estructura, contenido, ordenamiento, filtros y paginación."
 		}
 	],
 	"auth": {
@@ -831,14 +904,6 @@
 	],
 	"variable": [
 		{
-			"key": "searchName",
-			"value": ""
-		},
-		{
-			"key": "searchIndex",
-			"value": ""
-		},
-		{
 			"key": "new_user_id",
 			"value": ""
 		},
@@ -851,6 +916,14 @@
 			"key": "skip",
 			"value": "10",
 			"type": "string"
+		},
+		{
+			"key": "searchName",
+			"value": ""
+		},
+		{
+			"key": "searchIndex",
+			"value": ""
 		}
 	]
 }
