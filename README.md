@@ -8,7 +8,12 @@ Fue diseñado como práctica profesional para aplicar conceptos de QA técnico, 
 ## 🔐 Autenticación
 
 El primer paso realizado es la autenticación mediante `/auth/login`.  
-Se capturan y guardan variables como el token de sesión y el ID del usuario para usarlas en futuras peticiones.
+Se capturan y se guardan las variables del token de sesión y el ID del usuario.
+
+> 🔐 Nota: La autenticación mediante `/auth/login` está disponible y simula un flujo real de login, pero no es obligatoria.  
+> Los endpoints de DummyJSON funcionan incluso sin token, ya que la API no realiza validación de autorización.  
+> Se mantiene el flujo de autenticación como práctica profesional, incluyendo el envío automático del token en los headers.
+
 
 ---
 
